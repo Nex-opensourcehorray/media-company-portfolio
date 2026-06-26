@@ -148,7 +148,7 @@ These services establish layered security controls across identity, data protect
 ## 3. Architecture Overview
 * **Current State (On-Premises):** *(Insert image link: `![On-Prem Architecture](./architecture/current-state-onprem.png)`)*
   [Briefly describe the bottlenecks of the legacy setup.]
-* **Target State (Cloud):** *(Insert image link: `![Target Architecture](./architecture/target-state-cloud.png)`)*
+* **Target State (Cloud):** *(Insert image link: `![Target Architecture](./architecture/AWS_final_version_architecture.png)`)*
   [Briefly describe the flow of the new architecture, highlighting network boundaries and subnets.]
 
 ## 4. Migration Strategy
