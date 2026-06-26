@@ -147,7 +147,22 @@ These services establish layered security controls across identity, data protect
 
 ## 3. Architecture Overview
 * **Current State (On-Premises):** *![On-Prem Architecture](./architecture/Receive_Note.png)*
-  [Briefly describe the bottlenecks of the legacy setup.]
+### 3.1 Current State – On-Premises Architecture
+
+The existing environment uses a **hybrid on-premises architecture** centered on a single cache-enabled application server. As indicated in the current-state section of the project documentation, this architecture represents the legacy environment that will be assessed before migration to the target AWS platform. 
+
+The centralized server supports seven client devices. All client requests are directed to this server, which performs the main application processing, business logic, and data-handling operations. Frequently accessed information is stored in an **in-memory cache**, such as RAM or Redis, allowing the server to respond to repeated read and write requests more quickly without retrieving the same information from persistent storage each time.
+
+For long-term persistence, the on-premises server connects securely to AWS through HTTPS or an AWS SDK. Incremental data, client information, backups, and archived files are transferred to Amazon S3 buckets. Data can also be retrieved from Amazon S3 and synchronized with the on-premises server when the required information is not available in the local cache. Therefore, the on-premises server remains the primary processing layer, while Amazon S3 mainly provides persistent and incremental storage.
+
+Despite providing relatively fast access through memory caching, the architecture has several limitations. The centralized server represents a **single point of failure** because all client processing and cache operations depend on the availability of one machine. A hardware failure, operating-system problem, cache failure, or maintenance activity could interrupt services for all connected clients.
+
+The design also has limited scalability. As the number of clients, application requests, or media-processing workloads increases, the server may experience CPU, memory, disk, and network contention. Scaling the environment would normally require manually upgrading the server or purchasing additional infrastructure. No load balancer, redundant application server, or automatic scaling capability is shown in the existing architecture.
+
+In addition, information stored only in memory is volatile and may be lost when the server restarts or experiences a failure. The organization must therefore maintain reliable synchronization between the memory cache and Amazon S3. Delayed or unsuccessful incremental writes could create inconsistent data between the local server and cloud storage. Dependence on the internet connection also means that network disruption may delay archival, synchronization, backup, and data-retrieval operations.
+
+Overall, the existing architecture is suitable for a small and relatively predictable workload, but it introduces availability, scalability, recovery, and operational-management risks. These constraints make it difficult to support unpredictable audience growth and media-streaming demand, providing the main justification for migrating processing, storage, and content-delivery functions to managed and scalable AWS services.
+
 * **Target State (Cloud):** *![Target Architecture](./architecture/AWS_final_version_architecture.png)*
   [Briefly describe the flow of the new architecture, highlighting network boundaries and subnets.]
 
