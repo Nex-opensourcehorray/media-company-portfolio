@@ -1,0 +1,2 @@
+{"rule":"ENGLISH_WORD_REPEAT_BEGINNING_RULE","sentence":"^\\QAWS Key Management Service: AWS KMS manages encryption keys used to protect supported data stores and application resources.\\E$"}
+{"rule":"ENGLISH_WORD_REPEAT_BEGINNING_RULE","sentence":"^\\QAWS Shield provides additional protection against distributed denial-of-service attacks affecting supported endpoints.\\E$"}
