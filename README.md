@@ -146,9 +146,9 @@ The migrated environment must protect media assets, application interfaces, view
 These services establish layered security controls across identity, data protection, application access, network entry points, monitoring, and governance.
 
 ## 3. Architecture Overview
-* **Current State (On-Premises):** *(Insert image link: `![On-Prem Architecture](./architecture/Receive_Note.png)`)*
+* **Current State (On-Premises):** *(![On-Prem Architecture](./architecture/Receive_Note.png))*
   [Briefly describe the bottlenecks of the legacy setup.]
-* **Target State (Cloud):** *(Insert image link: `![Target Architecture](./architecture/AWS_final_version_architecture.png)`)*
+* **Target State (Cloud):** *(![Target Architecture](./architecture/AWS_final_version_architecture.png))*
   [Briefly describe the flow of the new architecture, highlighting network boundaries and subnets.]
 
 ## 4. Migration Strategy
