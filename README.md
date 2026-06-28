@@ -163,8 +163,36 @@ In addition, information stored only in memory is volatile and may be lost when 
 
 Overall, the existing architecture is suitable for a small and relatively predictable workload, but it introduces availability, scalability, recovery, and operational-management risks. These constraints make it difficult to support unpredictable audience growth and media-streaming demand, providing the main justification for migrating processing, storage, and content-delivery functions to managed and scalable AWS services.
 
-* **Target State (Cloud):** *![Target Architecture](./architecture/AWS_final_version_architecture.png)*
-  [Briefly describe the flow of the new architecture, highlighting network boundaries and subnets.]
+
+## 3.2 Target-State AWS Architecture
+
+### Overall Architecture
+
+![Target-State AWS Media Platform — Overall Architecture](./architecture/Target-State AWS Media Platform — Overall Architecture.svg)
+
+**Figure 1 — Overall target-state AWS architecture.**
+The platform supports authenticated application access, live-stream processing, VOD processing, automated subtitle generation, global media delivery, and centralized security and monitoring controls.
+
+Figure 1 presents the system-level view. The labels F1–F6 correspond to the functional flows shown in Figure 2 and described in the Architecture Flow Index below.
+
+### Functional Flow Decomposition
+
+![Target-State AWS Media Platform — Functional Flow Decomposition](./architecture/Target-State AWS Media Platform — Functional Flow Decomposition.svg)
+
+**Figure 2 — Functional decomposition of the target-state architecture.**
+Figure 2 expands the major flows from Figure 1 and shows the AWS services responsible for authentication, live-streaming, VOD processing, subtitle processing, content delivery, and cross-cutting security controls.
+
+## Architecture Flow Index
+
+| Flow | Function                           | Primary AWS services                                                  |
+| ---- | ---------------------------------- | --------------------------------------------------------------------- |
+| F1   | Authentication and application API | Route 53, API Gateway, AWS WAF, Cognito, Lambda, DynamoDB             |
+| F2   | Live-stream processing             | MediaLive, Transcribe Live, Translate, MediaPackage                   |
+| F3   | VOD processing                     | S3, EventBridge, Step Functions, MediaConvert, SQS                    |
+| F4   | Subtitle processing                | Transcribe, Translate, S3, DynamoDB                                   |
+| F5   | Content delivery                   | CloudFront, MediaPackage, S3, Origin Access Control                   |
+| F6   | Security and monitoring            | WAF, KMS, Firewall Manager, CloudWatch, CloudTrail, Config, GuardDuty |
+
 
 ## 4. Migration Strategy
 ### 4.1 Migration Approach
