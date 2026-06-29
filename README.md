@@ -168,7 +168,7 @@ Overall, the existing architecture is suitable for a small and relatively predic
 
 ### Overall Architecture
 
-![Target-State AWS Media Platform — Overall Architecture](./architecture/Target-State AWS Media Platform — Overall Architecture.svg)
+*![Target-State AWS Media Platform — Overall Architecture](./architecture/Target-State_AWS_Media_Platform%20-%20Overall_Architecture.svg)*
 
 **Figure 1 — Overall target-state AWS architecture.**
 The platform supports authenticated application access, live-stream processing, VOD processing, automated subtitle generation, global media delivery, and centralized security and monitoring controls.
@@ -177,7 +177,7 @@ Figure 1 presents the system-level view. The labels F1–F6 correspond to the fu
 
 ### Functional Flow Decomposition
 
-![Target-State AWS Media Platform — Functional Flow Decomposition](./architecture/Target-State AWS Media Platform — Functional Flow Decomposition.svg)
+*![Target-State AWS Media Platform — Functional Flow Decomposition](./architecture/Target-State_AWS_Media_Platform%20-%20Functional_Flow_Decomposition.svg)*
 
 **Figure 2 — Functional decomposition of the target-state architecture.**
 Figure 2 expands the major flows from Figure 1 and shows the AWS services responsible for authentication, live-streaming, VOD processing, subtitle processing, content delivery, and cross-cutting security controls.
