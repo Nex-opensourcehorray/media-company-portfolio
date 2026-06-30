@@ -2,9 +2,9 @@ terraform {
   required_version = ">= 1.10.0"
 
   backend "s3" {
-    bucket = "REPLACE_STATE_BUCKET"
-    key    = "landing-zone/dev/terraform.tfstate"
-    region = "REPLACE_REGION"
+    bucket       = "REPLACE_STATE_BUCKET"
+    key          = "landing-zone/dev/terraform.tfstate"
+    region       = "REPLACE_REGION"
     use_lockfile = true
   }
 
@@ -16,9 +16,10 @@ terraform {
   }
 }
 
-data "aws_caller_identity" "current" {}
-
-data "aws_partition" "current" {}
+variable "aws_partition" {
+  type    = string
+  default = "aws"
+}
 
 variable "aws_region" {
   type = string
@@ -26,6 +27,11 @@ variable "aws_region" {
 
 variable "account_id" {
   type = string
+
+  validation {
+    condition     = can(regex("^[0-9]{12}$", var.account_id))
+    error_message = "account_id must be a 12-digit AWS account ID."
+  }
 }
 
 variable "deployment_role_name" {
@@ -36,16 +42,16 @@ variable "deployment_role_name" {
 variable "external_id" {
   type      = string
   default   = null
+  nullable  = true
   sensitive = true
 }
 
 provider "aws" {
-  region = var.aws_region
-
+  region              = var.aws_region
   allowed_account_ids = [var.account_id]
 
   assume_role {
-    role_arn     = "arn:${data.aws_partition.current.partition}:iam::${var.account_id}:role/terraform/${var.deployment_role_name}"
+    role_arn     = "arn:${var.aws_partition}:iam::${var.account_id}:role/terraform/${var.deployment_role_name}"
     session_name = "tf-dev"
     external_id  = var.external_id
   }
@@ -59,28 +65,18 @@ provider "aws" {
   }
 }
 
-locals {
-  environment = "dev"
-}
-
-# Example integration with platform modules
-
-module "security" {
-  source = "../../../modules/f6-security-observability"
+module "workload_stack" {
+  source = "../../modules/workload-stack"
 
   project_name = "media-platform"
-  environment   = local.environment
+  environment  = "dev"
+  aws_region   = var.aws_region
+
+  force_destroy_buckets = false
+  log_retention_days    = 30
+  waf_rate_limit        = 2000
 }
 
-module "vod" {
-  source = "../../../modules/f3-vod-processing"
-
-  project_name = "media-platform"
-  environment  = local.environment
-
-  permissions_boundary_arn = module.security.boundary_arn
-}
-
-output "account" {
+output "account_id" {
   value = var.account_id
 }
