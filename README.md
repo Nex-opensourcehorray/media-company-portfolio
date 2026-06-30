@@ -464,6 +464,8 @@ Security and operational incidents should be documented, investigated, and revie
 ## 6. Repository Navigation
 * `/docs/MIGRATION_PLAN.md` - Full phase-by-phase migration journey.
 * `/docs/RUNBOOK.md` - Cutover strategy and rollback procedures.
+* `/docs/SECURITY.md` - Data Protection and Infrastructure Robustness.
+* `/docs/VALIDATION.md` - Cutover strategy and rollback procedures.
 * `/infrastructure/` - Infrastructure as Code (IaC) templates used for deployment.
 
 ## 7. How to Deploy (Optional but Recommended)
