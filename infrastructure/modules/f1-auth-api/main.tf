@@ -1,3 +1,7 @@
+terraform {
+  required_version = ">= 1.7.0"
+}
+
 variable "environment" {
   type = string
 }
@@ -7,25 +11,24 @@ variable "project_name" {
   default = "media-platform"
 }
 
+variable "permissions_boundary_arn" {
+  description = "IAM permissions boundary ARN for future F1 execution roles."
+  type        = string
+  default     = null
+}
+
 locals {
   name = "${var.project_name}-${var.environment}-f1"
 }
 
 # F1: Authentication and Application API
-# Services intended:
-# - Amazon Cognito (user auth)
-# - API Gateway (REST/WebSocket)
-# - AWS Lambda (backend logic)
-# - DynamoDB (metadata/session store)
-# - AWS WAF association
-
-# TODO:
-# - Cognito User Pool
-# - API Gateway routes
-# - Lambda handlers
-# - IAM roles (least privilege)
-# - JWT authorizer integration
+# This module currently exposes a validated interface only. Resource
+# implementation will add Cognito, API Gateway, Lambda and DynamoDB.
 
 output "module_status" {
-  value = "F1-auth-api scaffold created"
+  value = "${local.name}-scaffold"
+}
+
+output "permissions_boundary_arn" {
+  value = var.permissions_boundary_arn
 }
