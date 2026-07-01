@@ -4,8 +4,8 @@ variable "project_name" {
   default     = "media-platform"
 
   validation {
-    condition     = can(regex("^[a-z0-9-]{3,24}$", var.project_name))
-    error_message = "project_name must contain 3-24 lowercase letters, numbers, or hyphens."
+    condition     = can(regex("^[a-z0-9-]{3,17}$", var.project_name))
+    error_message = "project_name must contain 3-17 lowercase letters, numbers, or hyphens so derived S3 bucket names remain valid."
   }
 }
 
