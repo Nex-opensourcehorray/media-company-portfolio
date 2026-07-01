@@ -32,18 +32,8 @@ jobs:
         with:
           terraform_version: 1.10.5
 
-      - name: Format Terraform files
-        run: terraform fmt -recursive
-
-      - name: Upload formatted Terraform artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: formatted-terraform
-          path: infrastructure
-          retention-days: 1
-
-      - name: Verify committed formatting
-        run: git diff --exit-code -- .
+      - name: Terraform format check
+        run: terraform fmt -check -recursive
 
       - name: Terraform initialize without backend
         run: terraform init -backend=false -input=false
