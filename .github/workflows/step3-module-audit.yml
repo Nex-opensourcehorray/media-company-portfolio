@@ -1,0 +1,28 @@
+name: Step 3 Module Audit
+
+on:
+  pull_request:
+    paths:
+      - "infrastructure/modules/f3-vod-processing/**"
+      - ".github/workflows/step3-module-audit.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  package-module:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: List VOD module files
+        run: find infrastructure/modules/f3-vod-processing -maxdepth 2 -type f -print | sort
+
+      - name: Upload VOD module source
+        uses: actions/upload-artifact@v4
+        with:
+          name: f3-vod-processing-source
+          path: infrastructure/modules/f3-vod-processing
+          retention-days: 1
