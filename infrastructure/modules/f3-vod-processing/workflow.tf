@@ -40,8 +40,8 @@ resource "aws_sfn_state_machine" "vod" {
         Resource = "arn:${data.aws_partition.current.partition}:states:::mediaconvert:createJob.sync"
 
         Parameters = {
-          Role   = aws_iam_role.mediaconvert_role.arn
-          Queue  = aws_media_convert_queue.vod.arn
+          Role  = aws_iam_role.mediaconvert_role.arn
+          Queue = aws_media_convert_queue.vod.arn
 
           StatusUpdateInterval = "SECONDS_60"
 
@@ -66,8 +66,8 @@ resource "aws_sfn_state_machine" "vod" {
                   Type = "HLS_GROUP_SETTINGS"
 
                   HlsGroupSettings = {
-                    "Destination.$" = "States.Format('s3://${aws_s3_bucket.output.bucket}/${var.output_prefix}{}/', $.source.eventId)"
-                    SegmentLength   = var.hls_segment_length_seconds
+                    "Destination.$"  = "States.Format('s3://${aws_s3_bucket.output.bucket}/${var.output_prefix}{}/', $.source.eventId)"
+                    SegmentLength    = var.hls_segment_length_seconds
                     MinSegmentLength = 0
                   }
                 }
@@ -77,8 +77,8 @@ resource "aws_sfn_state_machine" "vod" {
                     NameModifier = profile.name_modifier
 
                     ContainerSettings = {
-                      Container     = "M3U8"
-                      M3u8Settings   = {}
+                      Container    = "M3U8"
+                      M3u8Settings = {}
                     }
 
                     VideoDescription = {
@@ -89,8 +89,8 @@ resource "aws_sfn_state_machine" "vod" {
                         Codec = "H_264"
 
                         H264Settings = {
-                          RateControlMode = "QVBR"
-                          MaxBitrate      = profile.max_bitrate
+                          RateControlMode   = "QVBR"
+                          MaxBitrate        = profile.max_bitrate
                           SceneChangeDetect = "TRANSITION_DETECTION"
 
                           QvbrSettings = {
@@ -130,10 +130,10 @@ resource "aws_sfn_state_machine" "vod" {
 
         Retry = [
           {
-            ErrorEquals = ["States.ALL"]
+            ErrorEquals     = ["States.ALL"]
             IntervalSeconds = 5
-            MaxAttempts = 3
-            BackoffRate = 2.0
+            MaxAttempts     = 3
+            BackoffRate     = 2.0
           }
         ]
 
@@ -153,8 +153,8 @@ resource "aws_sfn_state_machine" "vod" {
         Resource = "arn:${data.aws_partition.current.partition}:states:::sqs:sendMessage"
 
         Parameters = {
-          QueueUrl            = aws_sqs_queue.workflow_failures.id
-          "MessageBody.$"    = "States.JsonToString($)"
+          QueueUrl        = aws_sqs_queue.workflow_failures.id
+          "MessageBody.$" = "States.JsonToString($)"
         }
 
         Next = "WorkflowFailed"
@@ -178,7 +178,7 @@ resource "aws_cloudwatch_event_rule" "vod_ingest" {
   description = "Trigger VOD pipeline on S3 uploads"
 
   event_pattern = jsonencode({
-    source      = ["aws.s3"]
+    source        = ["aws.s3"]
     "detail-type" = ["Object Created"]
 
     detail = {

@@ -2,15 +2,27 @@
 
 ## Current Status
 
-The deployable Infrastructure as Code implementation has not yet been added. This directory defines the intended Terraform structure and the requirements that future infrastructure code must satisfy.
+Step 2 introduces a real Terraform foundation and the first deployable infrastructure slice:
 
-No production-ready deployment is claimed until the Terraform configuration can be initialized, validated, planned, applied, tested, and destroyed successfully in a development AWS environment.
+- Private S3 ingest bucket
+- Private S3 processed-content bucket
+- S3 Block Public Access
+- Bucket-owner-enforced object ownership
+- SSE-S3 encryption
+- Versioning
+- Ingest expiration and processed-content lifecycle rules
+- CloudFront distribution
+- CloudFront Origin Access Control
+- Processed-bucket policy restricted to the specific CloudFront distribution
+- Default project and environment tags
+- Validated input variables
+- Non-sensitive outputs for testing
+- Development variable and remote-state examples
+- GitHub Actions formatting and validation workflow
 
-## Chosen Direction
+This code has not yet been applied to an AWS account. Production readiness is not claimed until it has been initialized, planned, deployed, tested, evidenced, and destroyed successfully in a development environment.
 
-Terraform is the planned primary Infrastructure as Code tool for the portfolio proof of concept. CloudFormation may be discussed as an alternative, but deployment instructions should not present both tools as interchangeable implementations unless both are actually maintained and tested.
-
-## Planned Structure
+## Implemented Structure
 
 ```text
 infrastructure/
@@ -22,114 +34,157 @@ infrastructure/
 ├── main.tf
 ├── modules/
 │   ├── storage/
-│   ├── vod-workflow/
-│   ├── metadata/
-│   ├── delivery/
-│   ├── monitoring/
-│   └── security/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   └── delivery/
+│       ├── main.tf
+│       ├── variables.tf
+│       └── outputs.tf
 └── environments/
     └── dev/
         ├── backend.tf.example
         └── dev.tfvars.example
 ```
 
-## First Implementation Scope
+## Requirements
 
-The first deployable vertical slice should include:
+- Terraform `>= 1.6.0, < 2.0.0`
+- AWS provider `>= 5.80.0, < 7.0.0`
+- AWS credentials supplied through an approved mechanism such as AWS IAM Identity Center, an assumed role, or environment-based credentials
+- Permission to create S3 buckets, S3 policies, CloudFront resources, and associated read-only identity data
 
-- Private S3 ingest bucket
-- Private S3 processed-content bucket
-- S3 encryption, versioning, lifecycle rules, and Block Public Access
-- CloudFront distribution and Origin Access Control
-- DynamoDB processing-status table
-- Event-driven workflow trigger
-- Step Functions workflow
-- SQS queue and dead-letter queue
-- Lambda functions where required
-- CloudWatch log groups and alarms
-- Least-privilege IAM roles
-- Standard project and cost-allocation tags
+Do not place access keys, client data, production values, or secrets in Terraform files or variable files.
 
-MediaLive and MediaPackage are intentionally excluded from the first implementation increment to keep the proof of concept affordable and repeatable.
+## Development Deployment
 
-## Required Tooling
-
-The implementation should pin and document:
-
-- Terraform version
-- AWS provider version
-- AWS CLI version used for testing
-- TFLint version
-- Checkov or tfsec version
-
-## Planned Commands
+Copy the sample variable file:
 
 ```bash
-terraform fmt -check
-terraform init
-terraform validate
-terraform plan -var-file=environments/dev/dev.tfvars
-terraform apply -var-file=environments/dev/dev.tfvars
+cd infrastructure
+cp environments/dev/dev.tfvars.example environments/dev/dev.tfvars
 ```
 
-After evidence has been collected:
+Review the values before proceeding. The example enables `force_destroy = true` for disposable development testing only.
+
+Format and initialize:
+
+```bash
+terraform fmt -recursive
+terraform init
+terraform validate
+```
+
+Create and review a saved plan:
+
+```bash
+terraform plan \
+  -var-file=environments/dev/dev.tfvars \
+  -out=dev.tfplan
+```
+
+Apply only after reviewing the complete plan:
+
+```bash
+terraform apply dev.tfplan
+```
+
+Retrieve validation outputs:
+
+```bash
+terraform output
+```
+
+## Initial Validation
+
+After deployment, use sample content only.
+
+1. Upload a non-sensitive test object to the processed bucket.
+2. Request the object through the `cloudfront_url` output.
+3. Confirm that the CloudFront request succeeds after distribution propagation.
+4. Attempt direct unauthenticated access to the S3 object URL.
+5. Confirm that direct S3 access is denied.
+6. Record sanitized evidence under `evidence/`.
+
+The ingest bucket is not connected to a processing workflow in Step 2. Event routing, Step Functions, SQS, Lambda, MediaConvert, and DynamoDB belong to later implementation steps.
+
+## Cleanup
+
+CloudFront distributions can take time to disable and delete. Remove test objects before destruction when `force_destroy` is false.
 
 ```bash
 terraform destroy -var-file=environments/dev/dev.tfvars
 ```
 
-These commands are examples until the corresponding files exist.
+Confirm that the following have been removed:
 
-## Configuration Rules
-
-- Do not commit AWS credentials.
-- Do not commit client data or production values.
-- Provide `.tfvars.example` files containing non-sensitive sample values.
-- Mark sensitive outputs appropriately.
-- Use least-privilege IAM policies.
-- Enable S3 Block Public Access.
-- Encrypt supported data stores.
-- Apply consistent project, environment, owner, and cost tags.
-- Define log retention rather than retaining all logs indefinitely.
-- Include cleanup instructions for every billable service.
+- Ingest bucket
+- Processed-content bucket
+- Processed-bucket policy
+- CloudFront distribution
+- CloudFront Origin Access Control
 
 ## State Management
 
-The first local development increment may use local state only when clearly documented and excluded from version control.
+Local state may be used only for a controlled individual development exercise and must not be committed.
 
-Before collaborative or production-like use, document and implement a protected remote-state strategy, including:
+`environments/dev/backend.tf.example` documents the expected remote-state direction. Before collaborative or production-like use, create a dedicated protected state backend with:
 
-- Encrypted state storage
-- State locking where supported
+- Encryption
 - Restricted access
-- Versioning or recovery controls
-- Separation between environments
+- State recovery or versioning
+- Locking
+- Environment separation
 
-## Required Outputs
+The media buckets created by this project must not be reused as the Terraform state bucket.
 
-The first implementation should expose only non-sensitive values required for validation, such as:
+## Security Decisions in Step 2
 
-- Development CloudFront domain
-- Ingest bucket identifier
-- Processed-content bucket identifier
-- DynamoDB table name
-- Step Functions state-machine identifier
-- Queue and dead-letter queue identifiers
-- Dashboard name
+- Both buckets block all forms of public access.
+- ACLs are disabled through `BucketOwnerEnforced` ownership controls.
+- Objects are encrypted at rest using SSE-S3.
+- CloudFront signs origin requests with Signature Version 4.
+- The processed bucket policy permits `s3:GetObject` only when the request comes from the exact CloudFront distribution ARN.
+- The ingest bucket has no public or CloudFront read policy.
+- HTTP viewers are redirected to HTTPS.
+- The AWS-managed optimized cache policy and security-header response policy are used.
 
-Account IDs, credentials, secrets, and sensitive endpoints must not be displayed unnecessarily.
+Customer-managed KMS keys, signed viewer URLs or cookies, WAF, logging, and security scanning remain later hardening steps.
 
-## Definition of Done
+## Current Outputs
 
-Infrastructure is considered ready for the first portfolio milestone when:
+- AWS account ID
+- AWS Region
+- Ingest bucket name
+- Processed-content bucket name
+- CloudFront distribution ID
+- CloudFront domain name
+- CloudFront HTTPS base URL
 
-1. `terraform fmt -check` passes.
-2. `terraform init` succeeds.
-3. `terraform validate` passes.
-4. Security scanning has no unresolved critical finding.
-5. A plan can be reviewed without secrets or client data.
-6. A development deployment succeeds.
-7. Positive and negative validation tests pass.
-8. Sanitized evidence is added under `evidence/`.
-9. `terraform destroy` removes the test resources successfully.
-10. The README deployment section is updated with tested commands and prerequisites.
+These outputs contain no credentials or secrets. Account and resource identifiers should still be sanitized before publishing screenshots.
+
+## CI Validation
+
+`.github/workflows/terraform-validate.yml` runs:
+
+```bash
+terraform fmt -check -recursive
+terraform init -backend=false -input=false
+terraform validate -no-color
+```
+
+The workflow does not deploy AWS resources and does not require AWS credentials.
+
+## Step 2 Exit Criteria
+
+Step 2 is complete when:
+
+1. The GitHub Actions formatting and validation job passes.
+2. A reviewer confirms that no credential or client-sensitive value is present.
+3. The Terraform plan is reviewed in a development account.
+4. The private-origin test succeeds.
+5. Direct S3 object access is denied.
+6. The environment can be destroyed successfully.
+7. Sanitized validation evidence is recorded.
+
+Items 3-7 require an AWS development deployment and remain unverified until that deployment is performed.

@@ -70,9 +70,9 @@ module "workload_stack" {
   environment  = local.environment
   aws_region   = var.aws_region
 
-  force_destroy_buckets  = false
-  log_retention_days     = 30
-  waf_rate_limit         = 2000
+  force_destroy_buckets = false
+  log_retention_days    = 30
+  waf_rate_limit        = 2000
 }
 
 output "account" {
