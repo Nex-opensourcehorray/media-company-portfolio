@@ -13,10 +13,10 @@ module "storage" {
 module "delivery" {
   source = "./modules/delivery"
 
-  project_name                    = var.project_name
-  environment                     = var.environment
-  processed_bucket_name           = module.storage.processed_bucket_name
-  processed_bucket_arn            = module.storage.processed_bucket_arn
-  processed_bucket_domain_name    = module.storage.processed_bucket_regional_domain_name
-  cloudfront_price_class          = var.cloudfront_price_class
+  project_name                 = var.project_name
+  environment                  = var.environment
+  processed_bucket_name        = module.storage.processed_bucket_name
+  processed_bucket_arn         = module.storage.processed_bucket_arn
+  processed_bucket_domain_name = module.storage.processed_bucket_regional_domain_name
+  cloudfront_price_class       = var.cloudfront_price_class
 }
