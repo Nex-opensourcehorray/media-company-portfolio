@@ -1,0 +1,12 @@
+# Rename this file only after creating a protected remote-state backend.
+# Do not reuse the media buckets created by this project for Terraform state.
+#
+# terraform {
+#   backend "s3" {
+#     bucket       = "replace-with-dedicated-terraform-state-bucket"
+#     key          = "media-platform/dev/terraform.tfstate"
+#     region       = "ap-southeast-1"
+#     encrypt      = true
+#     use_lockfile = true
+#   }
+# }
