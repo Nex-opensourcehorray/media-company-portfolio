@@ -1,0 +1,17 @@
+project_name = "media-platform"
+environment  = "dev"
+aws_region   = "ap-southeast-1"
+
+# Set true only for disposable development environments where Terraform
+# must be allowed to delete buckets that still contain test objects.
+force_destroy = true
+
+ingest_expiration_days    = 7
+processed_transition_days = 30
+cloudfront_price_class    = "PriceClass_100"
+
+additional_tags = {
+  Owner       = "portfolio"
+  CostCenter  = "learning"
+  DataClass   = "sample-only"
+}
